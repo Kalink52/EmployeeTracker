@@ -30,7 +30,7 @@ CREATE TABLE employee (
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     role_id INTEGER NOT NULL,
-    manager_id INTEGER, --should reference primary key?
+    manager_id INTEGER references employee(id), 
     FOREIGN KEY (role_id)
     references role(id)
 

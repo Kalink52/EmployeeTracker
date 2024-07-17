@@ -5,10 +5,10 @@ const PORT = process.env.PORT || 3001
 const app = express()
 const artBanner = require('./lib/textart');
 //table attempts
-const displayTable = require('./lib/displaytable');
 const getNewEmployee = require('./lib/getNewEmployee');
 const getNewRole = require('./lib/getNewRole');
 const getNewDepartment = require('./lib/getNewDepartment');
+const updateEmployee = require('./lib/updateEmployee');
 
 
 /* Pass your inquirer questions in here */
@@ -50,13 +50,18 @@ pool.connect()
 
 //testing space
 
+// pool.query(`select employee.id, employee.first_name, employee.last_name, role.department, role.salary, employee.manager_id, department.name
+//   from employee
+//   LEFT JOIN role ON employee.role_id=role.id
+//   LEFT JOIN department on role.department=department.id`
+//   , (err, {rows}) => {
+//     console.table(rows)
+  
 
+// })
 
 
 function init () {
-// run banner on start up?
-  // console.log(artBanner())
-
 // maybe put inquirer in it's own function?
 inquirer
   .prompt(questions)
@@ -67,7 +72,10 @@ inquirer
     let sql = '';
     switch (answers.choice) {
       case 'View All Employees':
-        sql = 'select * FROM employee';
+        sql = `select employee.id, employee.first_name, employee.last_name, role.department, role.salary, employee.manager_id, department.name
+  from employee
+  LEFT JOIN role ON employee.role_id=role.id
+  LEFT JOIN department on role.department=department.id`;
 
         pool.query(sql, function (err, {rows}) {
           console.table(rows);
@@ -88,7 +96,19 @@ inquirer
           })
         })
           return
-      case 'Update Employee Role': //todo
+      case 'Update Employee Role': //check if works
+        updateEmployee()        
+        .then((sql) => {
+          console.log(sql)
+          pool.query(sql, function (err, result) {
+            if (err){
+              console.log(err)
+              return
+            }
+            console.log(result)
+
+          })
+        })
         break;
       case 'View all Roles':
         sql = 'select * FROM role'
@@ -137,9 +157,9 @@ inquirer
         break;
       default: process.exit()
     }
-    // loops the code
-    // init() 
-
+  })
+  .then(() => {
+    // init()
   })
   .catch((error) => {
     if (error.isTtyError) {
@@ -149,4 +169,7 @@ inquirer
     }
   });
 }
+
+// run banner on start up?
+  console.log(artBanner())
   init()
